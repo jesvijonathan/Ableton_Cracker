@@ -1,7 +1,22 @@
+# What is this?
+This is an open-source implementation of the R2R Modification of Ableton Live.
+# Compatibility
+- Works on Windows and Linux (with wine)
+- This should work for all Ableton Live Versions above Live 9 (9,10,11,12)
+- For every Edition too (Lite, Intro, Standard, Suite)
+# How to use
+1. Open `hex.json`
+2. Change the `file_path` variable to your Ableton executable path.
+3. Save the file, dont touch the other variables.
+4. Run `patcher.py`, your Ableton should be patched.
+5. Run the `keygen.py`
 # Credits
-The Implementation of the KeyGen (kg.py) was made by rufoa.
+The Implementation of the KeyGen (keygen.py) was made by rufoa. Go leave a star on his Git page! 
 
 # KeyGen
+## Usage
+` usage: kg.py [-h] -i HWID [-o OUTPUT] [-v {9,10,11,12}] [-e {Lite,Intro,Standard,Suite}]`
+
 This is an open source reimplementation of `R2RLIVE.dll` by Team R2R.
 
 Like `R2RLIVE.dll`, this script uses Team R2R's signing key only.
