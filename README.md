@@ -12,7 +12,7 @@ This is an open-source implementation of the R2R Modification of Ableton Live.
 5. Run the `keygen.py`
 # KeyGen
 ## Usage
-` usage: kg.py [-h] -i HWID [-o OUTPUT] [-v {9,10,11,12}] [-e {Lite,Intro,Standard,Suite}]`
+` usage: keygen.py [-h] -i HWID [-o OUTPUT] [-v {9,10,11,12}] [-e {Lite,Intro,Standard,Suite}]`
 
 The KeyGen is an open source reimplementation of `R2RLIVE.dll` by Team R2R.
 
