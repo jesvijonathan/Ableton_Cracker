@@ -1,5 +1,8 @@
 # What is this?
 This is an open-source implementation of the R2R Modification of Ableton Live.
+# Download
+Download the src from Releases Tab. Otherwise features could be broken.
+https://github.com/devilAPI/abletonCracker/releases/latest
 # Compatibility
 - Works on Windows and Linux (with wine)
 - This should work for all Ableton Live Versions above Live 9 (9,10,11,12)
