@@ -6,8 +6,8 @@ def read_config_from_json(json_file_path):
         with open(json_file_path, 'r') as json_file:
             data = json.load(json_file)
             file_path = data.get("file_path")
-            old_signkey = data.get("old_signkey")
-            new_signkey = data.get("new_signkey")
+            new_signkey = data.get("old_signkey")
+            old_signkey = data.get("new_signkey")
 
             if not file_path or not old_signkey or not new_signkey:
                 raise ValueError("JSON file must contain 'file_path', 'old_signkey', and 'new_signkey'.")

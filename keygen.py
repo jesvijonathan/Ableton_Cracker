@@ -1,4 +1,4 @@
-import argparse
+import json
 import re
 from random import randint
 
@@ -14,13 +14,9 @@ EDITIONS = {
     "Suite": 2,
 }
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-i", "--hwid", help="Your hardware code", required=True)
-parser.add_argument("-o", "--output", help="Authorization file", default="Authorize.auz")
-parser.add_argument("-v", "--version", help="Ableton Live version", type=int, choices=range(9, 13), default=12)
-parser.add_argument("-e", "--edition", help="Ableton Live edition", type=str.capitalize, choices=EDITIONS, default="Suite")
-args = parser.parse_args()
-
+def load_config(filename: str):
+    with open(filename, 'r') as f:
+        return json.load(f)
 
 def construct_key(*, p, q, g, y, x) -> dsa.DSAPrivateKey:
     params = dsa.DSAParameterNumbers(p, q, g)
@@ -28,14 +24,12 @@ def construct_key(*, p, q, g, y, x) -> dsa.DSAPrivateKey:
     priv = dsa.DSAPrivateNumbers(x, pub)
     return priv.private_key(backend=default_backend())
 
-
 def sign(k: dsa.DSAPrivateKey, m: str) -> str:
     """P1363 format sig over m as a string of hex digits"""
     assert k.key_size == 1024
     sig = k.sign(m.encode(), SHA1())
     r, s = decode_dss_signature(sig)
     return "{:040X}{:040X}".format(r, s)
-
 
 def fix_group_checksum(group_number: int, n: int) -> int:
     checksum = n >> 4 & 0xf ^ \
@@ -46,20 +40,17 @@ def fix_group_checksum(group_number: int, n: int) -> int:
                group_number
     return n & 0xfff0 | checksum
 
-
 def overall_checksum(groups: list[int]) -> int:
     r = 0
     for i in range(20):
         g, digit = divmod(i, 4)
         v = groups[g] >> (digit * 8) & 0xff
-        # v is lowbyte, highbyte, 0, 0 in turn for each group
         r ^= v << 8
         for _ in range(8):
             r <<= 1
             if r & 0x10000:
                 r ^= 0x8005
     return r & 0xffff
-
 
 def random_serial():
     """
@@ -78,7 +69,6 @@ def random_serial():
     d = overall_checksum(groups)
     return "{:04X}-{:04X}-{:04X}-{:04X}-{:04X}-{:04X}".format(*groups, d)
 
-
 def generate_single(k: dsa.DSAPrivateKey, id1: int, id2: int, hwid: str) -> str:
     f = "{},{:02X},{:02X},Standard,{}"
     serial = random_serial()
@@ -86,14 +76,12 @@ def generate_single(k: dsa.DSAPrivateKey, id1: int, id2: int, hwid: str) -> str:
     sig = sign(k, msg)
     return f.format(serial, id1, id2, sig)
 
-
 def generate_all(k: dsa.DSAPrivateKey, edition: str, version: int, hwid: str) -> str:
     yield generate_single(k, EDITIONS[edition], version << 4, hwid)
     for i in range(0x40, 0xff + 1):
         yield generate_single(k, i, 0x10, hwid)
     for i in range(0x8000, 0x80ff + 1):
         yield generate_single(k, i, 0x10, hwid)
-
 
 team_r2r_key = construct_key(
     p=0xbab5a10970f083e266a1252897daac1d67374712e79d3df1bc8c08a3493c6aa9a2ff33be4513d8b6767ab6aae2af6cc9107976fa75fee134e8b7be03d78cc64e089c845207d306a6035f172c5b750275f00bd3ca2331b8a59d54fe79393854dd884b8d334d553b38bc5e886c0a2dd0e4ec32f7d88de1a7c9df5c424ee7b1ce6d,
@@ -103,11 +91,14 @@ team_r2r_key = construct_key(
     x=0xc369ea757b46484d1df3819cc4183f6f9a9bcf3c
 )
 
-hwid = args.hwid.upper()
+# Load configuration
+config = load_config('config.json')
+
+hwid = config.get('hwid', '').upper()
 if len(hwid) == 24:
     hwid = "-".join(hwid[i:i+4] for i in range(0, 24, 4))
 assert re.fullmatch(r"([0-9A-F]{4}-){5}[0-9A-F]{4}", hwid), f"Expected hardware ID like 1111-1111-1111-1111-1111-1111, not {hwid}"
 
-lines = generate_all(team_r2r_key, args.edition, args.version, hwid)
-with open(args.output, mode="w", newline="\n") as f:
+lines = generate_all(team_r2r_key, config.get('edition', 'Suite'), config.get('version', 12), hwid)
+with open(config.get('authorize_file_output', 'Authorize.auz'), mode="w", newline="\n") as f:
     f.write("\n".join(lines))
