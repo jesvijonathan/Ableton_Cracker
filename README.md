@@ -12,9 +12,9 @@ This script is not the result of reverse engineering Ableton Live, and the outpu
 
 You can download the Ableton Installers directly from Ableton's servers. There's also a tool that you can use, it didnt get updated in some time.
 
-(https://ableton-live.netlify.app/)[Ableton Live Downloader]
+[Ableton Live Downloader](https://ableton-live.netlify.app/)
 
-(https://github.com/montoulieu/ableton-live-downloader/pull/27)[Ableton Live Downloader GitHub Page]
+[Ableton Live Downloader GitHub Page](https://github.com/montoulieu/ableton-live-downloader/)
 
 # Compatibility
 
