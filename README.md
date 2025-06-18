@@ -24,7 +24,7 @@ You can download the Ableton Installers directly from Ableton's servers. There's
 
 # How to use
 
-1. Run `pip install cryptograpghy` to install dependencies
+1. Run `pip install cryptography` to install dependencies
 2. Find your Ableton HWID, open Ableton, and press "Authorize Ableton offline". You will find your HWID.
 2. Open `config.json` and change the variables to fit your Ableton Live installation. Make sure to follow the json language, for example double slash in the file path.
 3. Save the file.
