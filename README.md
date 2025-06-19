@@ -1,4 +1,4 @@
-# What is this?
+# abletonPatcher - What is this?
 
 This is an open-source implementation of the R2R Patch and `R2RLIVE.dll` of Ableton Live, written in Python 3.
 
@@ -28,11 +28,11 @@ You can download the Ableton Installers directly from Ableton's servers. There's
 2. Find your Ableton HWID, open Ableton, and press "Authorize Ableton offline". You will find your HWID.
 2. Open `config.json` and change the variables to fit your Ableton Live installation. Make sure to follow the json language, for example double slash in the file path.
 3. Save the file.
-4. Run `activate_ableton.py`, your Ableton should be patched and the `Authorize.auz` file should generate.
-5. Run Ableton, drag the `Authorize.auz` file into the activation Window
-6. You're done. Ableton Live is now activated.
+4. Run `patch_ableton.py`, your Ableton should be patched and the `Authorize.auz` file should generate.
+5. Run Ableton, drag the `Authorize.auz` file into the Window
+6. You're done.
 
-If there are any permission erros, its recommended to move the Ableton.exe into the same folder where `activate_ableton.py` is located.
+If there are any permission erros, its recommended to move the Ableton.exe into the same folder where `patch_ableton.py` is located.
 
 # Credits
 
