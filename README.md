@@ -36,4 +36,4 @@ If there are any permission erros, its recommended to move the Ableton.exe into 
 
 # Credits
 
-The Implementation of the KeyGen was made by rufoa. Go leave a star on his Git page!
+The Implementation of the KeyGen was made by [rufoa](https://github.com/rufoa). Go leave a star on his Git page!
