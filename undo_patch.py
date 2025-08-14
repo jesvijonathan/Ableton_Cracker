@@ -21,6 +21,8 @@ def read_config_from_json(json_file_path):
         print(f"Error parsing the JSON file {json_file_path}.")
         raise
 
+
+
 def replace_signkey_in_file(file_path, old_signkey, new_signkey):
     if len(old_signkey) != len(new_signkey):
         raise ValueError("The new signkey must be the same length as the old signkey.")
