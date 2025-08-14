@@ -1,4 +1,4 @@
-# abletonPatcher - What is this?
+# abletonCracker - What is this?
 
 This is an open-source implementation of the R2R Patch and `R2RLIVE.dll` of Ableton Live, written in Python 3.
 
