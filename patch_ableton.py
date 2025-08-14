@@ -355,3 +355,6 @@ def main():
     except Exception as e:
         print(f"\nPatch failed: {e}")
         input("Press Enter to exit...")
+
+if __name__ == "__main__":
+    main()
