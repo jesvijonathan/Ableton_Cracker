@@ -1,10 +1,31 @@
 import json
 import re
+import os
+import platform
+import sys
+import ctypes
+import subprocess
 from random import randint
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import dsa
 from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
 from cryptography.hazmat.primitives.hashes import SHA1
+
+def is_admin():
+    """Check if the script is running with administrator privileges"""
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin() != 0
+    except:
+        return False
+
+def run_as_admin():
+    """Relaunch the script with administrator privileges"""
+    script = os.path.abspath(sys.argv[0])
+    params = subprocess.list2cmdline(sys.argv[1:])
+    
+    # Request UAC elevation
+    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, f'"{script}" {params}', None, 1)
+    sys.exit(0)
 
 def load_config(filename: str):
     try:
@@ -83,15 +104,26 @@ def replace_signkey_in_file(file_path, old_signkey, new_signkey):
             with open(file_path, 'wb') as file:
                 file.write(content)
 
+            # Verify replacement
             if old_signkey_bytes in content:
                 print("Error: The old signkey is still present in the file.")
             else:
                 print("Signkey successfully replaced.")
     
+    except PermissionError:
+        print("\nPermission denied! Try running the script as Administrator.")
+        if platform.system() == "Windows":
+            print("Relaunching with admin privileges...")
+            run_as_admin()
+        else:
+            print("On Linux/macOS, try running with sudo.")
+            raise
     except FileNotFoundError:
         print(f"The file '{file_path}' was not found.")
+        raise
     except Exception as e:
         print(f"An error occurred: {e}")
+        raise
 
 def sign(k: dsa.DSAPrivateKey, m: str) -> str:
     """P1363 format sig over m as a string of hex digits"""
@@ -160,17 +192,166 @@ EDITIONS = {
     "Suite": 2,
 }
 
-# Load configuration
-config_file = 'config.json'
-file_path, old_signkey, new_signkey, hwid, edition, version, authorize_file_output, dsa_params = load_config(config_file)
+# Installation detection functions
+def get_user_config_dir():
+    system = platform.system()
+    if system == "Windows":
+        return os.getenv('APPDATA')
+    elif system == "Darwin":
+        return os.path.join(os.path.expanduser("~"), "Library", "Application Support")
+    else:  # Linux and others
+        return os.getenv('XDG_CONFIG_HOME', os.path.join(os.path.expanduser("~"), ".config"))
 
-# Construct the key from the loaded parameters
-team_r2r_key = construct_key(dsa_params)
+def find_installations():
+    system = platform.system()
+    installations = []
+    
+    if system == "Windows":
+        base_dir = "C:\\ProgramData\\Ableton"
+        if not os.path.exists(base_dir):
+            return installations
+            
+        for entry in os.listdir(base_dir):
+            if "Live" in entry:
+                entry_path = os.path.join(base_dir, entry)
+                if os.path.isdir(entry_path):
+                    program_dir = os.path.join(entry_path, "Program")
+                    if os.path.exists(program_dir):
+                        for file in os.listdir(program_dir):
+                            if file.endswith(".exe") and "Live" in file:
+                                exe_path = os.path.join(program_dir, file)
+                                installations.append((exe_path, entry))
+    
+    elif system == "Darwin":
+        base_dir = "/Applications"
+        if not os.path.exists(base_dir):
+            return installations
+            
+        for entry in os.listdir(base_dir):
+            if entry.endswith(".app") and "Ableton Live" in entry:
+                app_path = os.path.join(base_dir, entry)
+                exe_path = os.path.join(app_path, "Contents", "MacOS", "Live")
+                if os.path.exists(exe_path):
+                    name = entry.replace(".app", "")
+                    installations.append((exe_path, name))
+    
+    return installations
 
-# Generate keys and save the authorize file
-lines = generate_all(team_r2r_key, edition, version, hwid)
-with open(authorize_file_output, mode="w", newline="\n") as f:
-    f.write("\n".join(lines))
+def find_installation_data():
+    config_dir = get_user_config_dir()
+    base_dir = os.path.join(config_dir, "Ableton")
+    data_dirs = []
+    
+    if not os.path.exists(base_dir):
+        return data_dirs
+        
+    for entry in os.listdir(base_dir):
+        entry_path = os.path.join(base_dir, entry)
+        if os.path.isdir(entry_path) and "Live" in entry:
+            # Check if Unlock directory exists or can be created
+            data_dirs.append((entry_path, entry))
+    
+    return data_dirs
 
-# Replace the signkey in the binary file
-replace_signkey_in_file(file_path, old_signkey, new_signkey)
+def main():
+    # Request admin on Windows if needed
+    if platform.system() == "Windows" and not is_admin():
+        print("\nThis operation requires administrator privileges on Windows.")
+        print("Relaunching with admin rights...")
+        run_as_admin()
+        return
+
+    print("Ableton Live Patcher - Running with administrative privileges\n")
+
+    # Load configuration
+    config_file = 'config.json'
+    try:
+        file_path, old_signkey, new_signkey, hwid, edition, version, authorize_file_output, dsa_params = load_config(config_file)
+    except Exception as e:
+        print(f"Error loading configuration: {e}")
+        input("Press Enter to exit...")
+        return
+
+    # Auto-detect installations if needed
+    if file_path.lower() == "auto":
+        installations = find_installations()
+        if not installations:
+            print("\nNo Ableton Live installations found. Please specify the path manually.")
+            input("Press Enter to exit...")
+            return
+
+        print("\nFound Ableton installations:")
+        for i, (path, name) in enumerate(installations):
+            print(f"{i+1}. {name} at {path}")
+
+        try:
+            selection = int(input("\nSelect installation to patch: ")) - 1
+            if selection < 0 or selection >= len(installations):
+                print("Invalid selection. Using first installation.")
+                selection = 0
+            file_path = installations[selection][0]
+            print(f"Selected: {file_path}")
+        except ValueError:
+            print("Invalid input. Using first installation found.")
+            file_path = installations[0][0]
+
+    # Auto-detect authorization file location if needed
+    if authorize_file_output.lower() == "auto":
+        data_dirs = find_installation_data()
+        if not data_dirs:
+            # Create default location if none found
+            config_dir = get_user_config_dir()
+            default_dir = os.path.join(config_dir, "Ableton", f"Live {version} {edition}")
+            unlock_dir = os.path.join(default_dir, "Unlock")
+            os.makedirs(unlock_dir, exist_ok=True)
+            authorize_file_output = os.path.join(unlock_dir, "Authorize.auz")
+            print(f"\nUsing default authorization file location: {authorize_file_output}")
+        else:
+            print("\nFound Ableton data directories:")
+            for i, (path, name) in enumerate(data_dirs):
+                print(f"{i+1}. {name} at {path}")
+
+            try:
+                selection = int(input("\nSelect data directory: ")) - 1
+                if selection < 0 or selection >= len(data_dirs):
+                    print("Invalid selection. Using first directory.")
+                    selection = 0
+                unlock_dir = os.path.join(data_dirs[selection][0], "Unlock")
+                os.makedirs(unlock_dir, exist_ok=True)
+                authorize_file_output = os.path.join(unlock_dir, "Authorize.auz")
+                print(f"Selected: {authorize_file_output}")
+            except ValueError:
+                print("Invalid input. Using first data directory found.")
+                unlock_dir = os.path.join(data_dirs[0][0], "Unlock")
+                os.makedirs(unlock_dir, exist_ok=True)
+                authorize_file_output = os.path.join(unlock_dir, "Authorize.auz")
+
+    # Construct the key from the loaded parameters
+    try:
+        team_r2r_key = construct_key(dsa_params)
+    except Exception as e:
+        print(f"Error constructing DSA key: {e}")
+        input("Press Enter to exit...")
+        return
+
+    # Generate keys and save the authorize file
+    print("\nGenerating authorization keys...")
+    try:
+        lines = list(generate_all(team_r2r_key, edition, version, hwid))
+        with open(authorize_file_output, "w", newline="\n") as f:
+            f.write("\n".join(lines))
+        print(f"Authorization file created: {authorize_file_output}")
+    except Exception as e:
+        print(f"Error generating authorization keys: {e}")
+        input("Press Enter to exit...")
+        return
+
+    # Replace the signkey in the binary file
+    print("\nPatching executable...")
+    try:
+        replace_signkey_in_file(file_path, old_signkey, new_signkey)
+        print("\nPatch completed successfully!")
+        input("Press Enter to exit...")
+    except Exception as e:
+        print(f"\nPatch failed: {e}")
+        input("Press Enter to exit...")
