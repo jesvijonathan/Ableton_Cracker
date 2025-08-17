@@ -95,7 +95,10 @@ def replace_signkey_in_file(file_path, old_signkey, new_signkey):
         new_signkey_bytes = bytes.fromhex(new_signkey)
 
         if old_signkey_bytes not in content:
-            print(f"The old signkey '{old_signkey}' was not found in the file.")
+            if new_signkey_bytes in content:
+                print(f"The new signkey \n'{new_signkey}' \nis already present in the file. Ableton is already patched.")
+            else:
+                print(f"Neither the old nor the new signkey was found in the file. You may be running an unsupported version or a different patch.")
         else:
             print(f"The old signkey '{old_signkey}' was found. Replacing...")
 
