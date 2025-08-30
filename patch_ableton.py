@@ -10,6 +10,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import dsa
 from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
 from cryptography.hazmat.primitives.hashes import SHA1
+import requests
 
 def is_admin():
     """Check if the script is running with administrator privileges"""
@@ -29,6 +30,14 @@ def run_as_admin():
 
 def load_config(filename: str):
     try:
+        if not os.path.exists(filename):
+            print(f"Config file {filename} not found. Downloading...")
+            url = "https://raw.githubusercontent.com/jesvijonathan/Ableton_Cracker/master/config.json"
+            response = requests.get(url)
+            response.raise_for_status()
+            with open(filename, 'w') as f:
+                f.write(response.text)
+
         with open(filename, 'r') as f:
             data = json.load(f)
 
@@ -276,6 +285,7 @@ def main():
     
     # Load configuration
     config_file = 'config.json'
+
     try:
         file_path, old_signkey, new_signkey, hwid, edition, version, authorize_file_output, dsa_params = load_config(config_file)
     except Exception as e:
