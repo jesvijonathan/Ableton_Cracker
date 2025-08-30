@@ -224,6 +224,16 @@ def find_installations():
                             if file.endswith(".exe") and "Live" in file:
                                 exe_path = os.path.join(program_dir, file)
                                 installations.append((exe_path, entry))
+
+    elif system == "Linux":
+        wine_base = os.path.expanduser("~/.wine/drive_c/ProgramData/Ableton")
+        if os.path.isdir(wine_base):
+            for entry in os.listdir(wine_base):
+                program_dir = os.path.join(wine_base, entry, "Program")
+                if os.path.isdir(program_dir):
+                    for file in os.listdir(program_dir):
+                        if file.endswith(".exe") and "Live" in file:
+                            installations.append((os.path.join(program_dir, file), entry))
     
     elif system == "Darwin":
         base_dir = "/Applications"
@@ -263,9 +273,7 @@ def main():
         print("Relaunching with admin rights...")
         run_as_admin()
         return
-
-    print("Ableton Live Patcher - Running with administrative privileges\n")
-
+    
     # Load configuration
     config_file = 'config.json'
     try:
@@ -285,7 +293,7 @@ def main():
 
         print("\nFound Ableton installations:")
         for i, (path, name) in enumerate(installations):
-            print(f"{i+1}. {name} at {path}")
+            print(f"{i+1}. {name} at '{path}'")
 
         try:
             selection = int(input("\nSelect installation to patch: ")) - 1
@@ -312,7 +320,7 @@ def main():
         else:
             print("\nFound Ableton data directories:")
             for i, (path, name) in enumerate(data_dirs):
-                print(f"{i+1}. {name} at {path}")
+                print(f"{i+1}. {name} at '{path}'")
 
             try:
                 selection = int(input("\nSelect data directory: ")) - 1
