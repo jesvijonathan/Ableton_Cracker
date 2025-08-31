@@ -2,6 +2,14 @@
 
 An open-source, Python-based patch and key generator for Ableton Live, mirroring the functionality of Team R2R's tools. This project provides a streamlined, cross-platform solution for patching and authorizing Ableton Live.
 
+### <u>Direct Run</u> (Auto-Patch)
+
+Copy paste this one-liner cmd into your terminal & it should auto patch ableton.
+
+```bash
+curl -sS https://raw.githubusercontent.com/jesvijonathan/Ableton_Cracker/master/run.py | python3
+```
+
 ## Features
 
 - **All-in-One Script:** A single command is all you need to start the process.
@@ -14,15 +22,7 @@ An open-source, Python-based patch and key generator for Ableton Live, mirroring
 
 You can run the patcher instantly with a one-line command or by downloading the script manually. Python 3 must be installed on your system.
 
-### Method 1: Quick Run (Recommended)
-
-Open your terminal and quick run this command.
-
-```bash
-curl -sS https://raw.githubusercontent.com/jesvijonathan/Ableton_Cracker/master/run.py | python3
-```
-
-### Method 2: Manual Download
+### Manual Setup
 
 1. Download the `run.py` file from this repository.
 2. Open your terminal or command prompt in the folder where you saved the file.
