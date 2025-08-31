@@ -6,6 +6,11 @@ import platform
 def read_config_from_json(json_file_path="config.json"):
     """Reads configuration from the specified JSON file and swaps signkeys."""
     try:
+        if not os.path.exists("./file_path"):
+            print(f"Config file {json_file_path} not found. Downloading...")
+            url = "https://raw.githubusercontent.com/jesvijonathan/Ableton_Cracker/master/config.json"
+            os.system(f'curl -o "{json_file_path}" "{url}"')
+
         with open(json_file_path, 'r') as json_file:
             data = json.load(json_file)
 

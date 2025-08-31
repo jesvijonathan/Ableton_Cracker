@@ -6,6 +6,14 @@ import sys
 import ctypes
 import subprocess
 from random import randint
+from importlib.util import find_spec
+
+def ensure_dependencies(modules=("requests", "cryptography")):
+    missing = [m for m in modules if find_spec(m) is None]
+    if missing:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", *missing, "--quiet"])
+ensure_dependencies()
+
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import dsa
 from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
@@ -23,8 +31,6 @@ def run_as_admin():
     """Relaunch the script with administrator privileges"""
     script = os.path.abspath(sys.argv[0])
     params = subprocess.list2cmdline(sys.argv[1:])
-    
-    # Request UAC elevation
     ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, f'"{script}" {params}', None, 1)
     sys.exit(0)
 
@@ -291,7 +297,8 @@ def main():
     except Exception as e:
         print(f"Error loading configuration: {e}")
         input("Press Enter to exit...")
-        return
+        sys.exit(1)
+
 
     # Auto-detect installations if needed
     if file_path.lower() == "auto":
@@ -299,7 +306,7 @@ def main():
         if not installations:
             print("\nNo Ableton Live installations found. Please specify the path manually.")
             input("Press Enter to exit...")
-            return
+            sys.exit(1)
 
         print("\nFound Ableton installations:")
         for i, (path, name) in enumerate(installations):
@@ -353,7 +360,7 @@ def main():
     except Exception as e:
         print(f"Error constructing DSA key: {e}")
         input("Press Enter to exit...")
-        return
+        sys.exit(1)
 
     # Generate keys and save the authorize file
     print("\nGenerating authorization keys...")
@@ -365,7 +372,7 @@ def main():
     except Exception as e:
         print(f"Error generating authorization keys: {e}")
         input("Press Enter to exit...")
-        return
+        sys.exit(1)
 
     # Replace the signkey in the binary file
     print("\nPatching executable...")
@@ -376,6 +383,8 @@ def main():
     except Exception as e:
         print(f"\nPatch failed: {e}")
         input("Press Enter to exit...")
+    sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

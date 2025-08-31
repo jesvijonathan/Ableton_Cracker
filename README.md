@@ -1,37 +1,102 @@
-# abletonCracker - What is this?
+# Ableton Cracker
 
-This is an open-source implementation of the R2R Patch and `R2RLIVE.dll` of Ableton Live, written in Python 3.
+An open-source, Python-based patch and key generator for Ableton Live, mirroring the functionality of Team R2R's tools. This project provides a streamlined, cross-platform solution for patching and authorizing Ableton Live.
 
-Like `R2RLIVE.dll`, this script uses Team R2R's signing key only.
+## Features
 
-# Disclaimer
+- **All-in-One Script:** A single command is all you need to start the process.
+- **No Manual Setup:** The script automatically handles all configurations.
+- **Cross-Platform:** Fully compatible with Windows, macOS, and Linux (via Wine).
+- **Auto-Detect Installations:** Automatically finds your Ableton Live application.
+- **Reversible:** Includes a simple unpatcher to restore the original executable at any time.
 
-This script is not the result of reverse engineering Ableton Live, and the output of this script **will not** circumvent the protection on an **unmodified** copy of Ableton Live.
+## Getting Started
 
-# Download Ableton Installers
+You can run the patcher instantly with a one-line command or by downloading the script manually. Python 3 must be installed on your system.
 
-You can download the Ableton Installers directly from Ableton's servers. I made a small HTML file to make this easier for you.
+### Method 1: Quick Run (Recommended)
 
-[StaticAbletonDownloader](https://devilapi.github.io/StaticAbletonDownloader)
+Open your terminal and quick run this command.
 
-# Compatibility
+```bash
+curl -sS https://raw.githubusercontent.com/jesvijonathan/Ableton_Cracker/master/run.py | python3
+```
 
-- Works on Windows and Linux (with wine)
-- Should work for all Ableton Live Versions above Live 9 (9,10,11,12)
-- Every Edition works too (Lite, Intro, Standard, Suite)
+### Method 2: Manual Download
 
-# How to use
+1. Download the `run.py` file from this repository.
+2. Open your terminal or command prompt in the folder where you saved the file.
+3. Run the script:
 
-1. Run `pip install cryptography` to install dependencies
-2. Find your Ableton HWID, open Ableton, and press "Authorize Ableton offline". You will find your HWID.
-2. Open `config.json` and change the variables to fit your Ableton Live installation. Make sure to follow the json language, for example double slash in the file path.
-3. Save the file.
-4. Run `patch_ableton.py`, your Ableton should be patched and the `Authorize.auz` file should generate.
-5. Run Ableton, drag the `Authorize.auz` file into the Window
-6. You're done.
+- Windows:
 
-If there are any permission erros, its recommended to move the Ableton.exe into the same folder where `patch_ableton.py` is located.
+```powershell
+python run.py
+```
 
-# Credits
+- macOS / Linux:
 
-The Implementation of the KeyGen was made by [rufoa](https://github.com/rufoa). Go leave a star on his Git page!
+```bash
+sudo python3 run.py
+```
+
+## Usage Flow
+
+After starting the script, follow these steps (_Not required if auto-detection is successful_):
+
+### 1. Find Your Hardware ID (HWID)
+
+You need this unique ID from your computer to generate the correct authorization file.
+
+1. Open Ableton Live.
+2. Go to **Preferences → Licenses & Updates**.
+3. Click the **Authorize Offline** button.
+4. Your Hardware ID will be displayed. Copy this ID and keep it ready.
+
+### 2. Configure the `config.json` File
+
+1. The first time you run the script, it will download a `config.json` file into the same directory.
+2. Open `config.json` with any text editor.
+3. Replace the placeholder hwid (`"1111-..."`) with your own HWID.
+4. Optionally, change the edition and version to match your installation.
+
+### 3. Patch Ableton
+
+1. Go back to the script running in your terminal.
+2. Choose option `1. Patch` from the menu.
+3. The script will find your Ableton installation(s). If you have multiple, select the one you want to patch.
+4. It will patch the application and generate an `Authorize.auz` file.
+
+### 4. Authorize Live
+
+1. Open Ableton Live.
+2. Drag and drop the generated `Authorize.auz` file onto the Ableton window.
+3. You're done! Your Ableton Live is now fully authorized.
+
+## 🔧 Compatibility
+
+| Platform | Supported | Notes                                  |
+| -------- | --------- | -------------------------------------- |
+| Windows  | ✅        | Works on all modern versions.          |
+| macOS    | ✅        | Works on both Intel and Apple Silicon. |
+| Linux    | ✅        | Requires Wine to run Ableton Live.     |
+
+- **Ableton Versions:** 9, 10, 11, 12
+- **Ableton Editions:** Lite, Intro, Standard, Suite
+
+## Download Ableton Installers
+
+You can download official Ableton Live installers directly from their servers:
+
+[StaticAbletonDownloader](#)
+
+## Disclaimer
+
+This script is for **educational purposes only**. It is not the result of reverse engineering Ableton Live, and its output will not circumvent the protection on an unmodified copy of Ableton Live.
+
+## Credits
+
+- **rufoa**
+- **jesvijonathan**
+- **devilAPI**
+- **drmext**
