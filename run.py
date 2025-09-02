@@ -50,7 +50,6 @@ def run_tmp_script(url):
     import requests
     global TEMP_SCRIPT_PATH
     raw_url = f"https://raw.githubusercontent.com/{repo}/master/{url}"
-    print(f"[DEBUG] Fetching: {raw_url}")
     resp = requests.get(raw_url, timeout=10)
     resp.raise_for_status()
     fd, TEMP_SCRIPT_PATH = tempfile.mkstemp(suffix=".py")
