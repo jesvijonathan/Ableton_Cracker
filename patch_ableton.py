@@ -322,37 +322,10 @@ def main():
         except ValueError:
             print("Invalid input. Using first installation found.")
             file_path = installations[0][0]
+    
+    # Fixed authorization file location
+    authorize_file_output = os.path.join(os.path.dirname(file_path), "Authorize.auz")
 
-    # Auto-detect authorization file location if needed
-    if authorize_file_output.lower() == "auto":
-        data_dirs = find_installation_data()
-        if not data_dirs:
-            # Create default location if none found
-            config_dir = get_user_config_dir()
-            default_dir = os.path.join(config_dir, "Ableton", f"Live {version} {edition}")
-            unlock_dir = os.path.join(default_dir, "Unlock")
-            os.makedirs(unlock_dir, exist_ok=True)
-            authorize_file_output = os.path.join(unlock_dir, "Authorize.auz")
-            print(f"\nUsing default authorization file location: {authorize_file_output}")
-        else:
-            print("\nFound Ableton data directories:")
-            for i, (path, name) in enumerate(data_dirs):
-                print(f"{i+1}. {name} at '{path}'")
-
-            try:
-                selection = int(input("\nSelect data directory: ")) - 1
-                if selection < 0 or selection >= len(data_dirs):
-                    print("Invalid selection. Using first directory.")
-                    selection = 0
-                unlock_dir = os.path.join(data_dirs[selection][0], "Unlock")
-                os.makedirs(unlock_dir, exist_ok=True)
-                authorize_file_output = os.path.join(unlock_dir, "Authorize.auz")
-                print(f"Selected: {authorize_file_output}")
-            except ValueError:
-                print("Invalid input. Using first data directory found.")
-                unlock_dir = os.path.join(data_dirs[0][0], "Unlock")
-                os.makedirs(unlock_dir, exist_ok=True)
-                authorize_file_output = os.path.join(unlock_dir, "Authorize.auz")
 
     # Construct the key from the loaded parameters
     try:
@@ -369,6 +342,13 @@ def main():
         with open(authorize_file_output, "w", newline="\n") as f:
             f.write("\n".join(lines))
         print(f"Authorization file created: {authorize_file_output}")
+        system = platform.system()
+        if system == "Windows":
+            os.system(f'explorer /select,"{authorize_file_output}"')
+        elif system == "Darwin":
+            subprocess.run(["open", authorize_file_output])
+        else:
+            subprocess.run(["xdg-open", authorize_file_output])
     except Exception as e:
         print(f"Error generating authorization keys: {e}")
         input("Press Enter to exit...")
