@@ -358,7 +358,6 @@ def main():
     try:
         replace_signkey_in_file(file_path, old_signkey, new_signkey)
         print("\nPatch completed successfully!")
-        print("\nJust drag & drop the authorization file into Ableton's registration window")
         input("\nPress Enter to exit...")
     except Exception as e:
         print(f"\nPatch failed: {e}")

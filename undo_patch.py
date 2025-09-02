@@ -2,6 +2,9 @@ import json
 import re
 import os
 import platform
+from ctypes import windll
+from subprocess import list2cmdline
+import sys
 
 def read_config_from_json(json_file_path="config.json"):
     """Reads configuration from the specified JSON file and swaps signkeys."""
@@ -123,7 +126,28 @@ def choose_installation(installations, config_path=None):
         print(f"Invalid input. Defaulting to first installation.")
         return installations[0][0]
 
+def is_admin():
+    """Check if the script is running with administrator privileges"""
+    try:
+        return windll.shell32.IsUserAnAdmin() != 0
+    except:
+        return False
+    
+def run_as_admin():
+    """Relaunch the script with administrator privileges"""
+    script = os.path.abspath(sys.argv[0])
+    params = list2cmdline(sys.argv[1:])
+    windll.shell32.ShellExecuteW(None, "runas", sys.executable, f'"{script}" {params}', None, 1)
+    sys.exit(0)
+
 def main():
+    # Request admin on Windows if needed
+    if platform.system() == "Windows" and not is_admin():
+        print("\nThis operation requires administrator privileges on Windows.")
+        print("Relaunching with admin rights...")
+        run_as_admin()
+        return
+    
     try:
         file_path, old_signkey, new_signkey = read_config_from_json()
 
