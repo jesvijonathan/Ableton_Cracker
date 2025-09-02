@@ -5,7 +5,6 @@ import tempfile
 import atexit
 import importlib.util
 
-# Run directly from https://github.com/jesvijonathan/Ableton_Cracker/tree/master
 repo = "jesvijonathan/Ableton_Cracker"
 
 if os.name == "nt":
@@ -14,8 +13,10 @@ if os.name == "nt":
 TEMP_SCRIPT_PATH = None
 def cleanup():
     if TEMP_SCRIPT_PATH and os.path.exists(TEMP_SCRIPT_PATH):
-        try: os.remove(TEMP_SCRIPT_PATH)
-        except OSError: pass
+        try:
+            os.remove(TEMP_SCRIPT_PATH)
+        except OSError:
+            pass
 atexit.register(cleanup)
 
 def ensure_dependencies(modules=("requests", "cryptography")):
@@ -36,7 +37,7 @@ def elevate_windows():
         cmd = (
             '/k python -c "import tempfile, os, sys, subprocess, requests; '
             'f=tempfile.NamedTemporaryFile(delete=False,suffix=\'.py\'); '
-            'f.write(requests.get(\'https://raw.githubusercontent.com/jesvijonathan/Ableton_Cracker/master/run.py\').content); '
+            f'f.write(requests.get(\\\"https://raw.githubusercontent.com/{repo}/master/run.py\\\").content); '
             'f.close(); subprocess.run([sys.executable,f.name]); os.remove(f.name)" & exit'
         )
         ctypes.windll.shell32.ShellExecuteW(None, "runas", "cmd.exe", cmd, None, 1)
@@ -48,7 +49,9 @@ def elevate_windows():
 def run_tmp_script(url):
     import requests
     global TEMP_SCRIPT_PATH
-    resp = requests.get(f"https://raw.githubusercontent.com/{repo}/master/{url}", timeout=10)
+    raw_url = f"https://raw.githubusercontent.com/{repo}/master/{url}"
+    print(f"[DEBUG] Fetching: {raw_url}")
+    resp = requests.get(raw_url, timeout=10)
     resp.raise_for_status()
     fd, TEMP_SCRIPT_PATH = tempfile.mkstemp(suffix=".py")
     with os.fdopen(fd, "w", encoding="utf-8") as f:
@@ -57,8 +60,8 @@ def run_tmp_script(url):
 
 def main_menu():
     options = {
-        "1": ("Patch", f"patch_ableton.py"),
-        "2": ("Unpatch", f"undo_patch.py"),
+        "1": ("Patch", "patch_ableton.py"),
+        "2": ("Unpatch", "undo_patch.py"),
         "3": ("Quit", None),
     }
 
@@ -73,15 +76,13 @@ def main_menu():
                 print("[!] Invalid choice.")
                 continue
             _, script = options[choice]
-            if detect_run_method() == "direct":
-                subprocess.run([sys.executable, f"{script}"])
-            elif script: 
+
+            if script:
                 run_tmp_script(script)
 
         except KeyboardInterrupt:
             print("\n[!] Exiting.")
             sys.exit(1)
-
 
 def main():
     ensure_dependencies()
