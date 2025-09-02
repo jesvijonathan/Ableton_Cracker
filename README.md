@@ -96,7 +96,9 @@ This script is for **educational purposes only**. It is not the result of revers
 
 ## Credits
 
+- **R2R**
 - **rufoa**
 - **jesvijonathan**
 - **devilAPI**
 - **drmext**
+- **Ableton**
