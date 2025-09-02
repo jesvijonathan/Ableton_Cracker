@@ -326,7 +326,6 @@ def main():
     # Fixed authorization file location
     authorize_file_output = os.path.join(os.path.dirname(file_path), "Authorize.auz")
 
-
     # Construct the key from the loaded parameters
     try:
         team_r2r_key = construct_key(dsa_params)
@@ -346,9 +345,9 @@ def main():
         if system == "Windows":
             os.system(f'explorer /select,"{authorize_file_output}"')
         elif system == "Darwin":
-            subprocess.run(["open", authorize_file_output])
+            subprocess.run(["open", "-R", authorize_file_output])
         else:
-            subprocess.run(["xdg-open", authorize_file_output])
+            subprocess.run(["xdg-open", os.path.dirname(authorize_file_output)])
     except Exception as e:
         print(f"Error generating authorization keys: {e}")
         input("Press Enter to exit...")
@@ -359,10 +358,11 @@ def main():
     try:
         replace_signkey_in_file(file_path, old_signkey, new_signkey)
         print("\nPatch completed successfully!")
-        input("Press Enter to exit...")
+        print("\nJust drag & drop the authorization file into Ableton's registration window")
+        input("\nPress Enter to exit...")
     except Exception as e:
         print(f"\nPatch failed: {e}")
-        input("Press Enter to exit...")
+        input("\nPress Enter to exit...")
     sys.exit(1)
 
 

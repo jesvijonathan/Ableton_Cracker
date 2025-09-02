@@ -5,6 +5,18 @@ import tempfile
 import atexit
 import importlib.util
 
+""" ================================================
+ Ableton Cracker
+----------------------------------------------------
+ Credits:
+   - R2R
+   - Ableton
+   - Jesvi Jonathan
+   - devilAPI (Felix Seiboldt)
+   - Rufoa Rufus
+   - drmext
+================================================= """
+
 repo = "jesvijonathan/Ableton_Cracker"
 
 if os.name == "nt":
@@ -46,6 +58,13 @@ def elevate_windows():
         run_as_admin()
         sys.exit(0)
 
+def set_terminal_title(title: str):
+    if os.name == "nt":  # Windows
+        os.system(f"title {title}")
+    else:  # Linux & macOS (ANSI escape sequence)
+        sys.stdout.write(f"\33]0;{title}\a")
+        sys.stdout.flush()
+
 def run_tmp_script(url):
     import requests
     global TEMP_SCRIPT_PATH
@@ -84,6 +103,7 @@ def main_menu():
             sys.exit(1)
 
 def main():
+    set_terminal_title("Ableton Cracker")
     ensure_dependencies()
     if os.name == "nt":
         elevate_windows()
